@@ -1,0 +1,136 @@
+using BepInEx;
+using System;
+using UnityEngine;
+using Utilla;
+
+namespace Project_STN
+{
+    /// <summary>
+    /// This is your mod's main class.
+    /// </summary>
+
+    /* This attribute tells Utilla to look for [ModdedGameJoin] and [ModdedGameLeave] */
+    [ModdedGamemode]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
+    [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
+    public class Plugin : BaseUnityPlugin
+    {
+        public bool inRoom;
+        public int playerHealth = 100;
+
+
+        void OnEnable()
+        {
+            /* Set up your mod here */
+            /* Code here runs at the start and whenever your mod is enabled*/
+
+            HarmonyPatches.ApplyHarmonyPatches();
+            Utilla.Events.GameInitialized += OnGameInitialized;
+        }
+
+        void OnDisable()
+        {
+            /* Undo mod setup here */
+            /* This provides support for toggling mods with ComputerInterface, please implement it :) */
+            /* Code here runs whenever your mod is disabled (including if it disabled on startup)*/
+
+            HarmonyPatches.RemoveHarmonyPatches();
+            Utilla.Events.GameInitialized -= OnGameInitialized;
+        }
+
+        void OnGameInitialized(object sender, EventArgs e)
+        {
+            /* Code here runs after the game initializes (i.e. GorillaLocomotion.Player.Instance != null) */
+        }
+
+        void Update()
+        {
+            /* Code here runs every frame when the mod is enabled */
+            if (inRoom)
+            {
+                if (Input.GetAxis("RightTrigger") > 0)
+                {
+                    // Decrease the player's health by 10
+                    TakeDamage(10);
+                }
+            }
+        }
+
+        public void TakeDamage(int damageAmount)
+        {
+            playerHealth -= damageAmount;
+        }
+
+        // Declare a function to increase the player's health
+        public void Heal(int healAmount)
+        {
+            playerHealth += healAmount;
+        }
+
+        // Declare a function to check if the player is dead
+        public bool IsDead()
+        {
+            return playerHealth <= 0;
+        }
+
+        /* This attribute tells Utilla to call this method when a modded room is joined */
+        [ModdedGamemodeJoin]
+        public void OnJoin(string gamemode)
+        {
+            /* Activate your mod here */
+            /* This code will run regardless of if the mod is enabled*/
+
+            inRoom = true;
+        }
+
+        /* This attribute tells Utilla to call this method when a modded room is left */
+        [ModdedGamemodeLeave]
+        public void OnLeave(string gamemode)
+        {
+            /* Deactivate your mod here */
+            /* This code will run regardless of if the mod is enabled*/
+
+            inRoom = false;
+        }
+    }
+
+    public class HealthBar : MonoBehaviour
+    {
+        // Reference to the player's health script
+        public Plugin playerHealth;
+
+        // Current health value
+        public int currentHealth;
+
+        void Start()
+        {
+            // Subscribe to the player's TakeDamage and Heal events
+        }
+
+        void OnGUI()
+        {
+            // Set the GUI color to white
+            GUI.color = Color.white;
+
+            // Calculate the width of the health bar based on the player's current health
+            float barWidth = playerHealth.playerHealth / 100f * Screen.width / 2;
+
+            // Draw the health bar at the top center of the screen
+            GUI.DrawTexture(new Rect(Screen.width / 2 - barWidth / 2, 0, barWidth, 20), Texture2D.whiteTexture);
+        }
+
+        // Event handler for the TakeDamage event
+        public void TakeDamage(object sender, EventArgs e)
+        {
+            // Update the current health value
+            currentHealth = playerHealth.playerHealth;
+        }
+
+        // Event handler for the Heal event
+        public void Heal(object sender, EventArgs e)
+        {
+            // Update the current health value
+            currentHealth = playerHealth.playerHealth;
+        }
+    }
+}
