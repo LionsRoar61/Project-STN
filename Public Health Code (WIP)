@@ -48,6 +48,7 @@ namespace Project_STN
             /* Code here runs every frame when the mod is enabled */
             if (inRoom)
             {
+                //Test if the code is working
                 if (Input.GetAxis("RightTrigger") > 0)
                 {
                     // Decrease the player's health by 10
