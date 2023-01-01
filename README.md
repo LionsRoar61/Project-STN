@@ -12,3 +12,5 @@ Tons of Resources,
 And Lots More! 
 
 Discord: https://discord.gg/ztfhrhsB
+
+Not all code has been tested as I am having problems with GT
